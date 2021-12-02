@@ -297,7 +297,20 @@ namespace AdventOfCode
         {
             return input.Lines().Select(parser);
         }
-
+        
+        /// <summary>
+        /// Transform a string containing many lines, into an enumerable{T} using
+        /// the supplied parser
+        /// </summary>
+        /// <param name="input">string containing one or more lines</param>
+        /// <param name="lineParser">a parser that takes a string and returns a T</param>
+        /// <typeparam name="T">the result type</typeparam>
+        /// <returns></returns>
+        public static IEnumerable<T> ParseStrings<T>(this string input, Func<string, T> lineParser)
+        {
+            return input.Lines().Select(lineParser);
+        }
+        
         public static string RemoveWhitespace(this string input)
         {
             return input.Strip("\n", Environment.NewLine, " ", "\t");
