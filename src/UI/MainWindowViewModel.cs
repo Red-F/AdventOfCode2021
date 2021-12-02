@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
+
 namespace AdventOfCode
 {
+
     public class MainWindowViewModel : BaseViewModel
     {
+        private readonly HttpClient _client = new(new LoggingHandler(new HttpClientHandler())); 
         public IEnumerable<DayAttribute> Days { get; set; }
         public DayAttribute SelectedDay { get; set; }
         public string InputText { get; set; }
@@ -211,7 +209,7 @@ namespace AdventOfCode
         {
             StartNewLog(SelectedDay.Year, SelectedDay.Day);
 
-            var input = GetInput(SelectedDay);
+            var input = await GetInputAsync(SelectedDay);
 
             LogMessage($"====== Input ======");
             LogMessage(input);
@@ -256,7 +254,7 @@ namespace AdventOfCode
             return (result, end);
         }
 
-        private string GetInput(DayAttribute day)
+        private async Task<string> GetInputAsync(DayAttribute day)
         {
             if (InputText?.Trim().Length > 0)
             {
@@ -270,7 +268,7 @@ namespace AdventOfCode
 
             if (!File.Exists(inputFile))
             {
-                DownloadInput(day, inputFile);
+                await DownloadInputAsync(day, inputFile);
             }
 
             InputText = File.ReadAllText(inputFile);
@@ -279,20 +277,22 @@ namespace AdventOfCode
             return InputText;
         }
 
-        private void DownloadInput(DayAttribute day, string inputFile)
+        private async Task DownloadInputAsync(DayAttribute day, string inputFile)
         {
-            var url = $"https://adventofcode.com/{day.Year}/day/{day.Day}/input";
-
             if (!File.Exists(AdventConfig.SessionCookieFile))
             {
                 throw new ArgumentException($"Cannot find Session Cookie file, please check AdventConfig.cs [{AdventConfig.SessionCookieFile}]");
             }
 
             var sessionCookie = File.ReadAllText(AdventConfig.SessionCookieFile);
-
-            using var client = new WebClient();
-            client.Headers.Add(HttpRequestHeader.Cookie, sessionCookie);
-            client.DownloadFile(url, inputFile);
+            var url = $"https://adventofcode.com/{day.Year}/day/{day.Day}/input";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Cookie", sessionCookie);
+            using var response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            await using var fs = new FileStream(inputFile, FileMode.CreateNew);
+            await stream.CopyToAsync(fs);
         }
 
         private BaseDay GetDayInstance(DayAttribute day)
@@ -393,6 +393,36 @@ namespace AdventOfCode
 
             OutputText = string.Empty;
             NotifyChange(nameof(OutputText));
+        }
+    }
+    public class LoggingHandler : DelegatingHandler
+    {
+        public LoggingHandler(HttpMessageHandler innerHandler)
+            : base(innerHandler)
+        {
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Console.WriteLine("Request:");
+            Console.WriteLine(request.ToString());
+            if (request.Content != null)
+            {
+                Console.WriteLine(await request.Content.ReadAsStringAsync());
+            }
+            Console.WriteLine();
+
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+
+            Console.WriteLine("Response:");
+            Console.WriteLine(response.ToString());
+            if (response.Content != null)
+            {
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+            }
+            Console.WriteLine();
+
+            return response;
         }
     }
 }
