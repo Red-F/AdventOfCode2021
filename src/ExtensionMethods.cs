@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 
 namespace AdventOfCode
@@ -605,6 +602,19 @@ namespace AdventOfCode
 
     public static class CollectionExtensions
     {
+        public static T[,] CreateGrid<T>(this IList<T[]> @this)
+        {
+            var rowLength = @this[0].Length;
+            var rc = new T[@this.Count, rowLength];
+            for (var i = 0; i < @this.Count; i++)
+            {
+                var array = @this[i];
+                for (var j = 0; j < rowLength; j++)  rc[i, j] = array[j];
+            }
+
+            return rc;
+        }
+
         public static void AddRange<T>(this ConcurrentBag<T> @this, IEnumerable<T> toAdd)
         {
             foreach (var element in toAdd)
