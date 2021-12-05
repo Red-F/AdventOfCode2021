@@ -419,6 +419,13 @@ namespace AdventOfCode
             return new string(Overlap<char>(a, b).ToArray());
         }
 
+        public static Point ToPoint(this string s)
+        {
+            var parts = s.Split(' ', ',');
+            if (parts.Length != 2) throw new ArgumentException($"string {s} can not convert to point");
+            return new Point(int.Parse(parts[0]), int.Parse(parts[1]));
+        }
+
         public static IEnumerable<T> Overlap<T>(this IEnumerable<T> a, IEnumerable<T> b) where T : IEquatable<T>
         {
             var result = new List<T>();
