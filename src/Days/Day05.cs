@@ -1,6 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Linq;
+﻿using System.Drawing;
 
 namespace AdventOfCode.Days
 {
@@ -11,15 +9,13 @@ namespace AdventOfCode.Days
         {
             var lines = input.ParseStrings(ParseLine).ToArray();
             lines = lines.Where(p => p.from.X == p.to.X || p.from.Y == p.to.Y).ToArray();
-            var points = ToPoints(lines);
-            var g = CreateGrid(lines);
-            var count = CountGrid(g);
-            return count.ToString();
+            return CreateGrid(lines).CountGrid().ToString();
         }
 
         public override string PartTwo(string input)
         {
-            return string.Empty;
+            var lines = input.ParseStrings(ParseLine).ToArray();
+            return CreateGrid(lines).CountGrid().ToString();
         }
 
         private static (Point from, Point to) ParseLine(string arg)
@@ -48,29 +44,11 @@ namespace AdventOfCode.Days
 
             return rc;
         }
+    }
 
-        private static IEnumerable<Point> ToPoints((Point from, Point to)[] lines)
-        {
-            var maxX = lines.Select(p => Math.Max(p.from.X, p.to.X)).Max() + 1;
-            var maxY = lines.Select(p => Math.Max(p.from.Y, p.to.Y)).Max() + 1;
-            var rc = new List<Point>();
-            foreach (var (@from, to) in lines)
-            {
-                var dX = @from.X == to.X ? 0 : (to.X - @from.X) / Math.Abs(to.X - @from.X);
-                var dY = @from.Y == to.Y ? 0 : (to.Y - @from.Y) / Math.Abs(to.Y - @from.Y);
-                var current = new Point(@from.X - dX, @from.Y - dY);
-                do
-                {
-                    current.X += dX;
-                    current.Y += dY;
-                    rc.Add(new Point(current.X, current.Y));
-                } while (current != to);
-            }
-
-            return rc;
-        }
-
-        private static int CountGrid(int[,] rc)
+    internal static class Day05Extensions
+    {
+        internal static int CountGrid(this int[,] rc)
         {
             var count = 0;
             for (var x = 0; x < rc.GetLength(0); x++)
