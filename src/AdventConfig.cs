@@ -3,7 +3,7 @@
     public static class AdventConfig
     {
         public static int DefaultYear = 2021;
-        public static int DefaultDay = 7;
+        public static int DefaultDay = 8;
         public const string LogFileFolder = @"C:\Users\fred\Documents\GitHub\AdventOfCode2021\logs";
         public const string InputFileFolder = @"C:\Users\fred\Documents\GitHub\AdventOfCode2021\input";
         public const string TestFileFolder = @"C:\Users\fred\Documents\GitHub\AdventOfCode2021\tests";
