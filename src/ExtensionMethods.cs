@@ -1226,7 +1226,7 @@ namespace AdventOfCode
             return grid.Clone(c => c);
         }
 
-        public static IEnumerable<char> GetNeighbors(this char[,] map, int x, int y, bool includeDiagonals)
+        public static IEnumerable<T> GetNeighbors<T>(this T[,] map, int x, int y, bool includeDiagonals)
         {
             var neighbors = new Point(x, y).GetNeighbors(includeDiagonals);
 
@@ -1244,14 +1244,14 @@ namespace AdventOfCode
             return map.GetNeighbors(x, y, true);
         }
 
-        public static IEnumerable<(Point point, char c)> GetNeighborPoints(this char[,] map, int x, int y)
+        public static IEnumerable<(Point point, T c)> GetNeighborPoints<T>(this T[,] map, int x, int y, bool includeDiagonals = false)
         {
-            return map.GetNeighborPoints(new Point(x, y));
+            return map.GetNeighborPoints(new Point(x, y), includeDiagonals);
         }
 
-        public static IEnumerable<(Point point, char c)> GetNeighborPoints(this char[,] map, Point p)
+        public static IEnumerable<(Point point, T c)> GetNeighborPoints<T>(this T[,] map, Point p, bool includeDiagonals = false)
         {
-            var neighbors = p.GetNeighbors(false);
+            var neighbors = p.GetNeighbors(includeDiagonals);
 
             foreach (var n in neighbors)
             {
@@ -1459,6 +1459,22 @@ namespace AdventOfCode
             }
 
             return result;
+        }
+
+        public static T[,] Map<T>(this char[,] grid, Func<char, T> map)
+        {
+            var rc = new T[grid.GetLength(0), grid.GetLength(1)];
+            for (var x = 0; x < grid.GetLength(0); x++)
+            for (var y = 0; y < grid.GetLength(1); y++)
+                rc[x, y] = map(grid[x, y]);
+            return rc;
+        }
+
+        public static void Foreach<T>(this T[,] grid, Func<T,T> map)
+        {
+            for (var x = 0; x < grid.GetLength(0); x++)
+            for (var y = 0; y < grid.GetLength(1); y++)
+                grid[x, y] = map(grid[x, y]);
         }
     }
 
