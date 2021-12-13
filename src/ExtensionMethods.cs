@@ -260,9 +260,9 @@ namespace AdventOfCode
             return new string(source.Reverse().ToArray());
         }
 
-        public static IEnumerable<string> Lines(this string input)
+        public static IEnumerable<string> Lines(this string input, bool keepEmptyLines = false)
         {
-            return input.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            return input.Split(new string[] { Environment.NewLine, "\n" }, keepEmptyLines ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
         }
 
         public static IEnumerable<string> Paragraphs(this string input)
