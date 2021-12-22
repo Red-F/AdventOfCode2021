@@ -864,6 +864,18 @@ namespace AdventOfCode
             }
         }
 
+        public static TValue SafeGet<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key)
+        {
+            if (dict.ContainsKey(key))
+            {
+                return dict[key];
+            }
+            else
+            {
+                return default;
+            }
+        }
+
         public static bool SafeCompare<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, TValue value)
         {
             if (dict.ContainsKey(key))
